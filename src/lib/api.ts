@@ -1,4 +1,8 @@
-const BASE_URL = 'https://zapasya.vercel.app/'
+// ── Buyer App (orders) ──
+
+const BUYER_BASE = 'https://zapasya.vercel.app/'
+const FEEDBACK_BASE = process.env.FEEDBACK_API_URL ?? ''
+const ANALYTICS_KEY = process.env.API_KEY_ANALYTICS ?? ''
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
 
@@ -33,7 +37,7 @@ export async function fetchOrders(params?: {
   if (params?.limit) searchParams.set('limit', String(params.limit))
 
   const queryString = searchParams.toString()
-  const url = `${BASE_URL}/api/orders${queryString ? `?${queryString}` : ''}`
+  const url = `${BUYER_BASE}/api/orders${queryString ? `?${queryString}` : ''}`
 
   const secret = process.env.BUYER_SECRET
   if (!secret) throw new Error('BUYER_SECRET no configurada')
@@ -55,7 +59,7 @@ export async function fetchOrderById(id: string): Promise<Order> {
   const secret = process.env.BUYER_SECRET
   if (!secret) throw new Error('BUYER_SECRET no configurada')
 
-  const res = await fetch(`${BASE_URL}/api/orders?id=${id}`, {
+  const res = await fetch(`${BUYER_BASE}/api/orders?id=${id}`, {
     headers: { 'buyer-key': secret },
   })
 
@@ -65,5 +69,107 @@ export async function fetchOrderById(id: string): Promise<Order> {
     throw new Error(`Error API: ${res.status}`)
   }
 
+  return res.json()
+}
+
+// ── Feedback App (reviews / stats) ──
+
+export interface HomeStats {
+  totalReviews: number
+  reviewsThisYear: number
+  topProduct: TopItem | null
+  topSeller: TopItem | null
+  topReviewed: TopItem | null
+  latestReview: LatestReview | null
+}
+
+export interface TopItem {
+  id: string
+  nombre: string
+  averageRating: number
+  totalReviews: number
+}
+
+export interface LatestReview {
+  id: string
+  tipo: string
+  targetName: string
+  rating: number
+  comentario: string
+  userName: string
+  fecha: string
+}
+
+export interface Review {
+  id: string
+  tipo: 'product' | 'seller'
+  targetId: string
+  userId: string
+  rating: number
+  comentario: string
+  estado: string
+  fecha: string
+  userName?: string
+  targetName?: string
+  sellerName?: string
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface ReviewStats {
+  averageRating: number
+  totalReviews: number
+  ratingDistribution: Record<number, number>
+}
+
+function feedbackHeaders() {
+  if (!ANALYTICS_KEY) throw new Error('API_KEY_ANALYTICS no configurada')
+  return {
+    Authorization: `Bearer ${ANALYTICS_KEY}`,
+    'Content-Type': 'application/json',
+  }
+}
+
+export async function getFeedbackStats(): Promise<HomeStats> {
+  if (!FEEDBACK_BASE) throw new Error('FEEDBACK_API_URL no configurada')
+
+  const res = await fetch(`${FEEDBACK_BASE}/api/stats`, {
+    headers: feedbackHeaders(),
+    next: { revalidate: 60 },
+  })
+
+  if (!res.ok) throw new Error(`Error al obtener stats: ${res.status}`)
+  return res.json()
+}
+
+export async function getFeedbackReviews(params?: {
+  page?: number
+  limit?: number
+  search?: string
+  tipo?: 'product' | 'seller'
+}): Promise<PaginatedResponse<Review>> {
+  if (!FEEDBACK_BASE) throw new Error('FEEDBACK_API_URL no configurada')
+
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.set('page', String(params.page))
+  if (params?.limit) searchParams.set('limit', String(params.limit))
+  if (params?.search) searchParams.set('search', params.search)
+  if (params?.tipo) searchParams.set('tipo', params.tipo)
+
+  const qs = searchParams.toString()
+  const url = `${FEEDBACK_BASE}/api/reviews${qs ? `?${qs}` : ''}`
+
+  const res = await fetch(url, {
+    headers: feedbackHeaders(),
+    next: { revalidate: 60 },
+  })
+
+  if (!res.ok) throw new Error(`Error al obtener reseñas: ${res.status}`)
   return res.json()
 }
