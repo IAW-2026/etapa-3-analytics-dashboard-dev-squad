@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   BarChart3,
   TrendingUp,
+  ShoppingBag,
   Sun,
   Moon,
   Menu,
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
     label: 'Feedback',
     icon: BarChart3,
   },
+  { href: '/dashboard/seller',    label: 'Seller App', icon: ShoppingBag },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
