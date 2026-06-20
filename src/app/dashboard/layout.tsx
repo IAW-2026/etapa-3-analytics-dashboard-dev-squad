@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   ChevronLeft,
+  Truck,
 } from 'lucide-react'
 import { useTheme } from '../../components/theme-provider'
 
@@ -28,6 +29,11 @@ const NAV_ITEMS = [
     icon: BarChart3,
   },
   { href: '/dashboard/seller',    label: 'Seller App', icon: ShoppingBag },
+  { 
+    href: '/dashboard/shipping',
+    label: 'Envíos', 
+    icon: Truck 
+  },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
