@@ -1,24 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useTransition } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Truck, Package, Clock, DollarSign, Calendar } from 'lucide-react'
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts'
+import {PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,} from 'recharts'
 import type { ShippingSummary } from '../../../components/shipments/types'
 import { STATUS_LABELS, STATUS_COLORS, CARRIER_LABELS } from '../../../components/shipments/ShippingLabels'
 
@@ -60,7 +47,7 @@ function CardTitle({ icon: Icon, tint, children }: { icon: React.ElementType; ti
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 shadow-lg text-xs space-y-1">
+    <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg text-xs space-y-1">
       {label && <p className="font-medium opacity-80">{label}</p>}
       {payload.map((p: any, i: number) => (
         <p key={i} className="flex items-center gap-1.5">
@@ -110,6 +97,7 @@ interface ShippingAnalyticsClientProps {
 export default function ShippingAnalyticsClient({ data, selectedMonth }: ShippingAnalyticsClientProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
 
   const { kpis, funnel, statusDistribution, monthlyTrend, carrierComparison, stageTimes, discounts, staleShipments, topDestinations } = data
 
@@ -119,7 +107,10 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
     const params = new URLSearchParams()
     if (value !== 'all') params.set('month', value)
     const query = params.toString()
-    router.push(query ? `${pathname}?${query}` : pathname)
+
+    startTransition(() => {
+      router.push(query ? `${pathname}?${query}` : pathname)
+    })
   }
 
   const funnelData = funnel.map((f) => ({
@@ -158,7 +149,8 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
           <select
             value={selectedMonth ?? 'all'}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="text-sm rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 outline-none"
+            disabled={isPending}
+            className="text-sm rounded-lg border border-border bg-background px-3 py-1.5 outline-none disabled:opacity-50"
           >
             <option value="all">Todo el período</option>
             {monthOptions.map((m) => (
@@ -167,15 +159,24 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
               </option>
             ))}
           </select>
+          {isPending && (
+            <span className="w-4 h-4 rounded-full border-2 border-border border-t-transparent animate-spin" />
+          )}
         </div>
       </div>
 
+      <div
+        aria-busy={isPending}
+        className={`space-y-8 transition-opacity duration-150 ${
+          isPending ? 'opacity-40 pointer-events-none' : 'opacity-100'
+        }`}
+      >
       {/* KPIs */}
       <KpisSection kpis={kpis} />
 
       {/* Embudo + distribución actual */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl border border-[var(--border)] p-5">
+        <div className="rounded-xl border border-border p-5">
           <CardTitle icon={Truck} tint="bg-blue-500/15 text-blue-400">Embudo de envíos</CardTitle>
           <p className="text-xs opacity-50 mt-1 mb-4">Envíos que alcanzaron al menos cada etapa</p>
           <ResponsiveContainer width="100%" height={160}>
@@ -191,7 +192,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] p-5">
+        <div className="rounded-xl border border-border p-5">
           <CardTitle icon={Package} tint="bg-purple-500/15 text-purple-400">Estado actual</CardTitle>
           <div className="flex items-center gap-6 mt-5">
             <Donut data={statusData} size={120} />
@@ -203,7 +204,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
       </div>
 
       {/* Tendencia mensual */}
-      <div className="rounded-xl border border-[var(--border)] p-5">
+      <div className="rounded-xl border border-border p-5">
         <CardTitle icon={Clock} tint="bg-orange-500/15 text-orange-400">Tendencia mensual</CardTitle>
         <p className="text-xs opacity-50 mt-1 mb-4">
           {selectedMonth
@@ -228,7 +229,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
 
       {/* Comparativa por carrier + tiempo por etapa */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl border border-[var(--border)] p-5">
+        <div className="rounded-xl border border-border p-5">
           <CardTitle icon={Truck} tint="bg-blue-500/15 text-blue-400">Comparativa por tipo de envío</CardTitle>
           <div className="grid grid-cols-2 gap-4 mt-5">
             {carrierComparison.map((c) => (
@@ -243,7 +244,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
           </div>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] p-5">
+        <div className="rounded-xl border border-border p-5">
           <CardTitle icon={Clock} tint="bg-purple-500/15 text-purple-400">Tiempo promedio por etapa</CardTitle>
           <p className="text-xs opacity-50 mt-1 mb-4">Días entre cambios de estado</p>
           <ResponsiveContainer width="100%" height={140}>
@@ -259,7 +260,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
       </div>
 
       {/* Costos de envío */}
-      <div className="rounded-xl border border-[var(--border)] p-5">
+      <div className="rounded-xl border border-border p-5">
         <CardTitle icon={DollarSign} tint="bg-green-500/15 text-green-400">Costos de envío</CardTitle>
         <div className="grid grid-cols-2 gap-4 mt-5">
           <div>
@@ -275,6 +276,7 @@ export default function ShippingAnalyticsClient({ data, selectedMonth }: Shippin
 
       {/* Envíos estancados + Provincias con más envíos (delegado) */}
       <OperationalTables staleShipments={staleShipments} topDestinations={topDestinations} />
+      </div>
     </div>
   )
 }

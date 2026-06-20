@@ -30,7 +30,7 @@ function CardTitle({ icon: Icon, tint, children }: { icon: React.ElementType; ti
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 shadow-lg text-xs space-y-1">
+    <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg text-xs space-y-1">
       {label && <p className="font-medium opacity-80">{label}</p>}
       {payload.map((p: any, i: number) => (
         <p key={i} className="flex items-center gap-1.5">
@@ -52,8 +52,8 @@ export function OperationalTables({ staleShipments, topDestinations }: Operation
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Envíos estancados */}
-      <div className="rounded-xl border border-[var(--border)] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[var(--border)]">
+      <div className="rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
           <CardTitle icon={AlertTriangle} tint="bg-yellow-500/15 text-yellow-500">
             Envíos estancados
           </CardTitle>
@@ -63,15 +63,15 @@ export function OperationalTables({ staleShipments, topDestinations }: Operation
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+              <tr className="border-b border-border bg-muted">
                 <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-50">Pedido</th>
                 <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-50">Estado</th>
                 <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-50">Días sin avance</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody className="divide-y divide-border">
               {staleShipments.map((s) => (
-                <tr key={s.orderId} className="hover:bg-[var(--muted)] transition-colors">
+                <tr key={s.orderId} className="hover:bg-muted transition-colors">
                   <td className="px-5 py-3 text-sm font-medium">{s.orderId}</td>
                   <td className="px-5 py-3 text-center">
                     <span
@@ -90,7 +90,7 @@ export function OperationalTables({ staleShipments, topDestinations }: Operation
       </div>
 
       {/* Provincias con más envíos */}
-      <div className="rounded-xl border border-[var(--border)] p-5">
+      <div className="rounded-xl border border-border p-5">
         <CardTitle icon={MapPin} tint="bg-blue-500/15 text-blue-500">Provincias con más envíos</CardTitle>
         <p className="text-xs opacity-50 mt-1 mb-4">Principales destinos de distribución</p>
         {topDestinations.length === 0 ? (

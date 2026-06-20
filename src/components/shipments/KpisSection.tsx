@@ -12,7 +12,7 @@ function KpiCard({ label, value, sub, icon: Icon, tint }: {
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-5">
+    <div className="rounded-xl border border-border bg-background p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-semibold uppercase tracking-wider opacity-50">{label}</p>
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tint}`}>
