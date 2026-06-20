@@ -3,7 +3,7 @@ import ShippingAnalyticsClient from "./ShippingAnalyticsClient"
 import type { ShippingSummary } from "../../../components/shipments/types"
 import DashboardLoading from "../loading"
 
-// Fetch server-side: la INTERNAL_API_KEY nunca llega al navegador.
+// Fetch server-side: la SHIPPING_API_KEY nunca llega al navegador.
 // Acepta un mes opcional (formato "YYYY-MM") que se reenvía tal cual al backend.
 async function getShippingSummary(month?: string): Promise<ShippingSummary | null> {
   try {
@@ -11,7 +11,7 @@ async function getShippingSummary(month?: string): Promise<ShippingSummary | nul
     if (month) url.searchParams.set("month", month)
 
     const res = await fetch(url.toString(), {
-      headers: { "x-api-key": process.env.INTERNAL_API_KEY! },
+      headers: { "x-api-key": process.env.SHIPPING_API_KEY! },
       cache: "no-store",
     })
     if (!res.ok) return null
