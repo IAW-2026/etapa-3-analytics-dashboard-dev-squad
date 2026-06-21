@@ -3,6 +3,30 @@
 const BUYER_BASE = 'https://zapasya.vercel.app/'
 const FEEDBACK_BASE = process.env.FEEDBACK_API_URL ?? ''
 const ANALYTICS_KEY = process.env.API_KEY_ANALYTICS ?? ''
+const PAYMENTS_BASE   = (process.env.NEXT_PUBLIC_PAYMENTS_API_URL ?? '').replace(/\/+$/, '')
+const PAYMENTS_KEY    = process.env.PAYMENTS_API_KEY ?? ''
+const PAYMENTS_BYPASS = process.env.PAYMENTS_VERCEL_BYPASS ?? ''
+
+export interface ChartPoint { fecha: string; monto: number }
+
+export interface PaymentsStats {
+  charts: {
+    ultimos7dias:  ChartPoint[]
+    ultimos30dias: ChartPoint[]
+  }
+  chartsRechazadas?: {
+    ultimos7dias:  ChartPoint[]
+    ultimos30dias: ChartPoint[]
+  }
+  kpis: {
+    exitosas7d:    number
+    disputas7d:    number
+    montoTotal7d:  number
+    montoTotal30d: number
+    rechazadas7d?:      number
+    montoRechazado7d?:  number
+  }
+}
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
 
@@ -171,5 +195,27 @@ export async function getFeedbackReviews(params?: {
   })
 
   if (!res.ok) throw new Error(`Error al obtener reseñas: ${res.status}`)
+  return res.json()
+}
+
+// ── Payments App (stats) ──
+
+export async function getPaymentsStats(): Promise<PaymentsStats> {
+  if (!PAYMENTS_BASE) throw new Error('NEXT_PUBLIC_PAYMENTS_API_URL no configurada')
+  if (!PAYMENTS_KEY)  throw new Error('PAYMENTS_API_KEY no configurada')
+    
+  const res = await fetch(`${PAYMENTS_BASE}/api/admin/stats`, {
+    headers: {
+      'x-api-key': PAYMENTS_KEY,
+      ...(PAYMENTS_BYPASS ? { 'x-vercel-protection-bypass': PAYMENTS_BYPASS } : {}),
+    },
+    next: { revalidate: 60 },
+  })
+
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Error al obtener stats de pagos: ${res.status}`)
+  }
   return res.json()
 }

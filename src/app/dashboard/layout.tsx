@@ -14,6 +14,7 @@ import {
   X,
   ChevronLeft,
   Truck,
+  CreditCard,
 } from 'lucide-react'
 import { useTheme } from '../../components/theme-provider'
 
@@ -33,6 +34,11 @@ const NAV_ITEMS = [
     href: '/dashboard/shipping',
     label: 'Envíos', 
     icon: Truck 
+  },
+  {
+    href: '/dashboard/payments',
+    label: 'Pagos',
+    icon: CreditCard,
   },
 ]
 
