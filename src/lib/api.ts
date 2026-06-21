@@ -203,7 +203,7 @@ export async function getFeedbackReviews(params?: {
 export async function getPaymentsStats(): Promise<PaymentsStats> {
   if (!PAYMENTS_BASE) throw new Error('NEXT_PUBLIC_PAYMENTS_API_URL no configurada')
   if (!PAYMENTS_KEY)  throw new Error('PAYMENTS_API_KEY no configurada')
-    
+
   const res = await fetch(`${PAYMENTS_BASE}/api/admin/stats`, {
     headers: {
       'x-api-key': PAYMENTS_KEY,
@@ -211,7 +211,6 @@ export async function getPaymentsStats(): Promise<PaymentsStats> {
     },
     next: { revalidate: 60 },
   })
-
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
