@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { startOfMonth, format } from 'date-fns'
+import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Review, HomeStats } from '@/lib/api'
 import OverviewCards from '@/components/analytics/OverviewCards'
@@ -52,17 +52,16 @@ function getMonthlyTrend(reviews: Review[]): { month: string; count: number }[] 
   const groups = new Map<string, number>()
 
   for (const r of reviews) {
-    const key = format(startOfMonth(new Date(r.fecha)), 'MMM yyyy', { locale: es })
+    const key = r.fecha.slice(0, 7)
     groups.set(key, (groups.get(key) ?? 0) + 1)
   }
 
   return Array.from(groups.entries())
-    .map(([month, count]) => ({ month, count }))
-    .sort((a, b) => {
-      const da = new Date(a.month)
-      const db = new Date(b.month)
-      return da.getTime() - db.getTime()
-    })
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, count]) => ({
+      month: format(new Date(key + '-01T12:00:00.000Z'), 'MMM yyyy', { locale: es }),
+      count,
+    }))
 }
 
 function getRatingDistribution(reviews: Review[]): Record<number, number> {
