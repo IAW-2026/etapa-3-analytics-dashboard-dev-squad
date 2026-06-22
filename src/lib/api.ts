@@ -198,6 +198,50 @@ export async function getFeedbackReviews(params?: {
   return res.json()
 }
 
+// ── Seller App (summary) ──
+
+export interface SellerSummary {
+  sellers:  { total: number; active: number; inactive: number }
+  products: { total: number; active: number; inactive: number }
+  sells:    { total: number; confirmed: number; pending: number; cancelled: number }
+  revenue:  { confirmed: number }
+  topSellers: { id: string; name: string; email: string; active: boolean; totalSells: number; totalProducts: number }[]
+  topProducts: { id: string; name: string; brand: string; price: number; stock: number; active: boolean; seller: string; totalSells: number }[]
+}
+
+export async function getSellerSummary(): Promise<SellerSummary> {
+  const base = process.env.NEXT_PUBLIC_SELLER_APP_URL
+  const key  = process.env.NEXT_PUBLIC_SUPERADMIN_KEY
+  if (!base || !key) throw new Error('SELLER env vars no configuradas')
+
+  const res = await fetch(`${base}/api/admin/summary`, {
+    headers: { 'X-Superadmin-Key': key },
+    next: { revalidate: 60 },
+  })
+  if (!res.ok) throw new Error(`Error al obtener seller summary: ${res.status}`)
+  return res.json()
+}
+
+// ── Shipping App (analytics) ──
+
+import type { ShippingSummary } from '@/components/shipments/types'
+
+export async function getShippingSummary(month?: string): Promise<ShippingSummary> {
+  const base = process.env.SHIPPING_APP_URL
+  const key  = process.env.SHIPPING_API_KEY
+  if (!base || !key) throw new Error('SHIPPING env vars no configuradas')
+
+  const url = new URL(`${base}/api/analytics`)
+  if (month) url.searchParams.set('month', month)
+
+  const res = await fetch(url.toString(), {
+    headers: { 'x-api-key': key },
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error(`Error al obtener shipping summary: ${res.status}`)
+  return res.json()
+}
+
 // ── Payments App (stats) ──
 
 export async function getPaymentsStats(): Promise<PaymentsStats> {

@@ -15,10 +15,16 @@ import {
   ChevronLeft,
   Truck,
   CreditCard,
+  PieChart,
 } from 'lucide-react'
 import { useTheme } from '../../components/theme-provider'
 
 const NAV_ITEMS = [
+  {
+    href: '/dashboard/general',
+    label: 'Datos Generales',
+    icon: PieChart,
+  },
   {
     href: '/dashboard',
     label: 'Órdenes',
