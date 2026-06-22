@@ -36,8 +36,6 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   DELIVERED: 'Entregada',
 }
 
-// Same palette as the StatusBadge dots in page.tsx, kept in one place so the
-// donut chart, legend, and table badges never drift out of sync.
 const STATUS_HEX: Record<OrderStatus, string> = {
   PENDING: '#fbbf24',
   PAID: '#22c55e',

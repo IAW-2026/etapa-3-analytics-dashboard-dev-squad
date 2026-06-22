@@ -213,7 +213,7 @@ export async function getPaymentsStats(): Promise<PaymentsStats> {
   })
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
+    await res.text().catch(() => {})
     throw new Error(`Error al obtener stats de pagos: ${res.status}`)
   }
   return res.json()
