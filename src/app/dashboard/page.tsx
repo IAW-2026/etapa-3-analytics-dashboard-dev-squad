@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { fetchOrders, type OrderStatus } from '@/lib/api'
 import { OrdersVolume, RevenueTrend, StatusDonut, type DailyPoint, type StatusCount } from './buyer/order-charts'
+import { PageSizeSelector } from '@/components/PageSizeSelector'
 
 const STATUS_COLORS: Record<OrderStatus, { bg: string; text: string; dot: string }> = {
   PENDING: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-400' },
@@ -142,16 +143,17 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 }
 
 export default async function DashboardPage(props: {
-  searchParams: Promise<{ status?: string; page?: string }>
+  searchParams: Promise<{ status?: string; page?: string; limit?: string }>
 }) {
   const searchParams = await props.searchParams
   const status = (Object.hasOwn(STATUS_LABELS, searchParams.status ?? '')
     ? searchParams.status
     : undefined) as OrderStatus | undefined
   const page = Math.max(1, Number(searchParams.page) || 1)
+  const limit = Math.min(100, Math.max(1, Number(searchParams.limit) || 10))
 
   const [orders, pending, paid, shipped, delivered, recent] = await Promise.all([
-    fetchOrders({ status, page, limit: 100 }),
+    fetchOrders({ status, page, limit }),
     fetchOrders({ status: 'PENDING', limit: 1 }),
     fetchOrders({ status: 'PAID', limit: 1 }),
     fetchOrders({ status: 'SHIPPED', limit: 1 }),
@@ -183,10 +185,10 @@ export default async function DashboardPage(props: {
   const revenueTrend = weekOverWeek(dailySeries, 'revenue')
 
   const filters = [
-    { label: 'Todas', href: '/dashboard', active: !status },
+    { label: 'Todas', href: `/dashboard?limit=${limit}`, active: !status },
     ...(['PENDING', 'PAID', 'SHIPPED', 'DELIVERED'] as OrderStatus[]).map((s) => ({
       label: STATUS_LABELS[s],
-      href: `/dashboard?status=${s}`,
+      href: `/dashboard?status=${s}&limit=${limit}`,
       active: status === s,
     })),
   ]
@@ -273,7 +275,7 @@ export default async function DashboardPage(props: {
             {orders.pagination.totalPages > 1 && (
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <a
-                  href={`/dashboard?page=${page - 1}${status ? `&status=${status}` : ''}`}
+                  href={`/dashboard?page=${page - 1}&limit=${limit}${status ? `&status=${status}` : ''}`}
                   className={`rounded-lg border px-3 py-1.5 transition-colors ${
                     page <= 1
                       ? 'pointer-events-none border-[var(--border)] text-gray-300 dark:text-gray-600'
@@ -282,11 +284,41 @@ export default async function DashboardPage(props: {
                 >
                   Anterior
                 </a>
-                <span className="px-2">
-                  {page} / {orders.pagination.totalPages}
-                </span>
+
+                {(() => {
+                  const pages: (number | 'ellipsis')[] = []
+                  const total = orders.pagination.totalPages
+                  const range = 2
+                  const start = Math.max(2, page - range)
+                  const end = Math.min(total - 1, page + range)
+
+                  pages.push(1)
+                  if (start > 2) pages.push('ellipsis')
+                  for (let i = start; i <= end; i++) pages.push(i)
+                  if (end < total - 1) pages.push('ellipsis')
+                  if (total > 1) pages.push(total)
+
+                  return pages.map((p, i) =>
+                    p === 'ellipsis' ? (
+                      <span key={`e-${i}`} className="px-1">...</span>
+                    ) : (
+                      <a
+                        key={p}
+                        href={`/dashboard?page=${p}&limit=${limit}${status ? `&status=${status}` : ''}`}
+                        className={`rounded-lg border px-3 py-1.5 transition-colors ${
+                          p === page
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]'
+                        }`}
+                      >
+                        {p}
+                      </a>
+                    )
+                  )
+                })()}
+
                 <a
-                  href={`/dashboard?page=${page + 1}${status ? `&status=${status}` : ''}`}
+                  href={`/dashboard?page=${page + 1}&limit=${limit}${status ? `&status=${status}` : ''}`}
                   className={`rounded-lg border px-3 py-1.5 transition-colors ${
                     page >= orders.pagination.totalPages
                       ? 'pointer-events-none border-[var(--border)] text-gray-300 dark:text-gray-600'
@@ -327,7 +359,7 @@ export default async function DashboardPage(props: {
                         <StatusBadge status={order.status} />
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        {order.customer ?? '—'}
+                        {order.receiverName || '—'}
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-sm font-medium text-[var(--foreground)]">
                         {order.total != null ? `$${Number(order.total).toFixed(2)}` : '—'}
@@ -351,7 +383,16 @@ export default async function DashboardPage(props: {
           <div className="flex items-center justify-between border-t border-[var(--border)] px-6 py-3">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {counts.total} {counts.total === 1 ? 'orden' : 'órdenes'} en total
+              {orders.data.length > 0 && (
+                <span className="ml-1">
+                  — Página {page} ({(page - 1) * limit + 1}–{Math.min(page * limit, counts.total)})
+                </span>
+              )}
             </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span>Mostrar</span>
+              <PageSizeSelector limit={limit} />
+            </div>
           </div>
         </div>
       </main>

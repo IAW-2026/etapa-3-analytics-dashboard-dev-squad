@@ -33,7 +33,7 @@ export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
 export interface Order {
   id: string
   status: OrderStatus
-  customer?: string
+  receiverName?: string
   total?: number
   createdAt?: string
 }
