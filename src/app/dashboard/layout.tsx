@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <img
                     src={user.imageUrl}
                     alt={user.fullName ?? "Usuario"}
-                    className="w-8 h-8 rounded-full shrink-0"
+                    className="w-5 h-5 rounded-full shrink-0"
                   />
 
                   {!collapsed && (

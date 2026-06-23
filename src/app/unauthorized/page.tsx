@@ -18,7 +18,7 @@ export default function UnauthorizedPage() {
           onClick={() => signOut({ redirectUrl: "/sign-in" })}
           className="px-5 py-2 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--muted)] transition-colors cursor-pointer"
         >
-          Iniciar sesión con otra cuenta
+          Cerrar sesión
         </button>
       </div>
     </div>
