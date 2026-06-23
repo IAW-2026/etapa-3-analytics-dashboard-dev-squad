@@ -54,6 +54,7 @@ export async function fetchOrders(params?: {
   page?: number
   limit?: number
 }): Promise<OrdersResponse> {
+  
   const searchParams = new URLSearchParams()
   if (params?.id) searchParams.set('id', params.id)
   if (params?.status) searchParams.set('status', params.status)
@@ -66,9 +67,13 @@ export async function fetchOrders(params?: {
   const secret = process.env.BUYER_SECRET
   if (!secret) throw new Error('BUYER_SECRET no configurada')
 
+    console.log("URL:", url)
+console.log("SECRET:", !!secret)
   const res = await fetch(url, {
     headers: { 'buyer-key': secret },
   })
+
+  console.log("STATUS:", res.status);
 
   if (!res.ok) {
     if (res.status === 403) throw new Error('Clave inválida')
