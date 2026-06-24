@@ -91,7 +91,7 @@ export function OperationalTables({ staleShipments, topDestinations }: Operation
 
       {/* Provincias con más envíos */}
       <div className="rounded-xl border border-border p-5">
-        <CardTitle icon={MapPin} tint="bg-blue-500/15 text-blue-500">Provincias con más envíos</CardTitle>
+        <CardTitle icon={MapPin} tint="bg-blue-500/15 text-blue-500">Ciudades con más envíos</CardTitle>
         <p className="text-xs opacity-50 mt-1 mb-4">Principales destinos de distribución</p>
         {topDestinations.length === 0 ? (
           <p className="text-sm opacity-50 py-6">No hay datos de destino para este período.</p>
