@@ -27,12 +27,19 @@ function CardTitle({ icon: Icon, tint, children }: { icon: React.ElementType; ti
   )
 }
 
-function ChartTooltip({ active, payload, label }: any) {
+interface ChartTooltipPayload {
+  name?: string
+  value?: number
+  color?: string
+  fill?: string
+}
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: ChartTooltipPayload[]; label?: string }) {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg text-xs space-y-1">
       {label && <p className="font-medium opacity-80">{label}</p>}
-      {payload.map((p: any, i: number) => (
+      {payload.map((p: ChartTooltipPayload, i: number) => (
         <p key={i} className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm inline-block shrink-0" style={{ background: p.color || p.fill }} />
           <span className="opacity-50">{p.name}:</span>
