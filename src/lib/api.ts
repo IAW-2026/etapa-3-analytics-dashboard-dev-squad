@@ -33,7 +33,7 @@ export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
 export interface Order {
   id: string
   status: OrderStatus
-  customer?: string
+  receiverName?: string
   total?: number
   createdAt?: string
 }
@@ -54,6 +54,7 @@ export async function fetchOrders(params?: {
   page?: number
   limit?: number
 }): Promise<OrdersResponse> {
+  
   const searchParams = new URLSearchParams()
   if (params?.id) searchParams.set('id', params.id)
   if (params?.status) searchParams.set('status', params.status)
@@ -66,9 +67,13 @@ export async function fetchOrders(params?: {
   const secret = process.env.BUYER_SECRET
   if (!secret) throw new Error('BUYER_SECRET no configurada')
 
+    console.log("URL:", url)
+console.log("SECRET:", !!secret)
   const res = await fetch(url, {
     headers: { 'buyer-key': secret },
   })
+
+  console.log("STATUS:", res.status);
 
   if (!res.ok) {
     if (res.status === 403) throw new Error('Clave inválida')
@@ -198,6 +203,50 @@ export async function getFeedbackReviews(params?: {
   return res.json()
 }
 
+// ── Seller App (summary) ──
+
+export interface SellerSummary {
+  sellers:  { total: number; active: number; inactive: number }
+  products: { total: number; active: number; inactive: number }
+  sells:    { total: number; confirmed: number; pending: number; cancelled: number }
+  revenue:  { confirmed: number }
+  topSellers: { id: string; name: string; email: string; active: boolean; totalSells: number; totalProducts: number }[]
+  topProducts: { id: string; name: string; brand: string; price: number; stock: number; active: boolean; seller: string; totalSells: number }[]
+}
+
+export async function getSellerSummary(): Promise<SellerSummary> {
+  const base = process.env.NEXT_PUBLIC_SELLER_APP_URL
+  const key  = process.env.NEXT_PUBLIC_SUPERADMIN_KEY
+  if (!base || !key) throw new Error('SELLER env vars no configuradas')
+
+  const res = await fetch(`${base}/api/admin/summary`, {
+    headers: { 'X-Superadmin-Key': key },
+    next: { revalidate: 60 },
+  })
+  if (!res.ok) throw new Error(`Error al obtener seller summary: ${res.status}`)
+  return res.json()
+}
+
+// ── Shipping App (analytics) ──
+
+import type { ShippingSummary } from '@/components/shipments/types'
+
+export async function getShippingSummary(month?: string): Promise<ShippingSummary> {
+  const base = process.env.SHIPPING_APP_URL
+  const key  = process.env.SHIPPING_API_KEY
+  if (!base || !key) throw new Error('SHIPPING env vars no configuradas')
+
+  const url = new URL(`${base}/api/analytics`)
+  if (month) url.searchParams.set('month', month)
+
+  const res = await fetch(url.toString(), {
+    headers: { 'x-api-key': key },
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error(`Error al obtener shipping summary: ${res.status}`)
+  return res.json()
+}
+
 // ── Payments App (stats) ──
 
 export async function getPaymentsStats(): Promise<PaymentsStats> {
@@ -213,7 +262,7 @@ export async function getPaymentsStats(): Promise<PaymentsStats> {
   })
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
+    await res.text().catch(() => {})
     throw new Error(`Error al obtener stats de pagos: ${res.status}`)
   }
   return res.json()

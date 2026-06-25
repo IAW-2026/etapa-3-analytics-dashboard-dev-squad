@@ -27,12 +27,19 @@ function CardTitle({ icon: Icon, tint, children }: { icon: React.ElementType; ti
   )
 }
 
-function ChartTooltip({ active, payload, label }: any) {
+interface ChartTooltipPayload {
+  name?: string
+  value?: number
+  color?: string
+  fill?: string
+}
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: ChartTooltipPayload[]; label?: string }) {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg text-xs space-y-1">
       {label && <p className="font-medium opacity-80">{label}</p>}
-      {payload.map((p: any, i: number) => (
+      {payload.map((p: ChartTooltipPayload, i: number) => (
         <p key={i} className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm inline-block shrink-0" style={{ background: p.color || p.fill }} />
           <span className="opacity-50">{p.name}:</span>
@@ -89,9 +96,9 @@ export function OperationalTables({ staleShipments, topDestinations }: Operation
         )}
       </div>
 
-      {/* Provincias con más envíos */}
+      {/* Ciudades con más envíos */}
       <div className="rounded-xl border border-border p-5">
-        <CardTitle icon={MapPin} tint="bg-blue-500/15 text-blue-500">Provincias con más envíos</CardTitle>
+        <CardTitle icon={MapPin} tint="bg-blue-500/15 text-blue-500">Ciudades con más envíos</CardTitle>
         <p className="text-xs opacity-50 mt-1 mb-4">Principales destinos de distribución</p>
         {topDestinations.length === 0 ? (
           <p className="text-sm opacity-50 py-6">No hay datos de destino para este período.</p>

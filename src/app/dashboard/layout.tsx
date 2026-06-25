@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useState } from 'react'
 import {
   LayoutDashboard,
@@ -15,10 +16,17 @@ import {
   ChevronLeft,
   Truck,
   CreditCard,
+  PieChart,
+  LogOut
 } from 'lucide-react'
 import { useTheme } from '../../components/theme-provider'
 
 const NAV_ITEMS = [
+  {
+    href: '/dashboard/general',
+    label: 'Datos Generales',
+    icon: PieChart,
+  },
   {
     href: '/dashboard',
     label: 'Órdenes',
@@ -47,6 +55,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { theme, setTheme } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   return (
     <div className="flex h-screen bg-[var(--background)] overflow-hidden">
@@ -138,6 +148,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {!collapsed && <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>}
           </button>
         </div>
+
+        {/* Usuario */}
+          <div className="px-2 py-3 border-t border-[var(--sidebar-border)]">
+            {user && (
+                <div className="flex items-center gap-3 px-3 mb-3">
+                  <img
+                    src={user.imageUrl}
+                    alt={user.fullName ?? "Usuario"}
+                    className="w-5 h-5 rounded-full shrink-0"
+                  />
+
+                  {!collapsed && (
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[var(--sidebar-fg)] truncate">
+                        {user.fullName || user.firstName}
+                      </p>
+                      <p className="text-xs opacity-60 text-[var(--sidebar-fg)] truncate">
+                        {user.primaryEmailAddress?.emailAddress}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            <button
+              onClick={() => signOut({ redirectUrl: "/sign-in" })}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-muted-hover)] cursor-pointer"
+            >
+              <LogOut className="w-5 h-5 shrink-0" />
+              {!collapsed && <span>Cerrar sesión</span>}
+            </button>
+          </div>
       </aside>
 
       {/* Main content */}
