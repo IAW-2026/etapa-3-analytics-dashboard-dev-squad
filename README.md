@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Analytics Dashboard — Zapasya
 
-## Getting Started
+**Producción:** [https://etapa-3-analytics-dashboard-dev-squ.vercel.app](https://etapa-3-analytics-dashboard-dev-squ.vercel.app)
 
-First, run the development server:
+---
+
+## Usuarios de prueba
+
+La aplicación utiliza **Clerk** para autenticación. Para ingresar al dashboard, puedes registrarte o iniciar sesión con cualquier cuenta de correo electrónico válida, es decir, que esté asociada a un rol de administrador. 
+
+---
+
+## Instrucciones de uso
+
+1.  Ingresar a la URL de producción.
+2.  Crear una cuenta o iniciar sesión mediante Clerk (correo electrónico y contraseña).
+3.  Navegar por las secciones del menú lateral:
+    - **Dashboard** — Órdenes de compra con filtros por estado (PENDING, PAID, SHIPPED, DELIVERED) y paginación.
+    - **Analytics** — Métricas de reseñas (distribución de puntuaciones, tendencia mensual, productos y vendedores destacados, reseñas recientes).
+    - **Seller** — KPIs de vendedores y productos (ingresos, ventas totales, top sellers y productos).
+    - **Payments** — Estadísticas de pagos (montos procesados, transacciones rechazadas, disputas).
+    - **Shipping** — Métricas de envíos (embudo de estados, tendencia mensual, comparativa por correo, costos, envíos estancados, destinos principales).
+
+Para ejecutar localmente:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # Completar con las variables reales
+npm run dev                   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Descripción del proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Analytics Dashboard** es un panel de administración centralizado para **Zapasya**, un e-commerce de zapatillas. El dashboard consume datos de cinco microservicios independientes —Buyer App, Feedback, Seller App, Payments y Shipping— y los unifica en una única interfaz web para facilitar el monitoreo y la toma de decisiones.
 
-## Learn More
+Cada sección del dashboard está diseñada como un módulo independiente que se comunica con su microservicio correspondiente mediante APIs autenticadas por API key.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Fortalezas de la App
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-   **Estados de carga y error:** Cada sección del dashboard cuenta con su propio `loading.tsx` (skeleton/spinner) y `error.tsx` (mensaje de error con botón de reintento), siguiendo las convenciones de Next.js App Router.
+-   **Responsive:** El menú lateral se colapsa en pantallas chicas con un toggle de hamburguesa. Los gráficos y tablas se adaptan al ancho disponible.
+-   **Manejo de datos faltantes:** Los componentes cliente validan la respuesta de la API antes de renderizar. Si un microservicio no responde o devuelve datos vacíos, se muestran valores por defecto (0, array vacío, etc.) en lugar de romper la interfaz.
+-   **Tema oscuro:** Se implementó con un `ThemeProvider` que persiste la preferencia en `localStorage` y respeta la preferencia del sistema (`prefers-color-scheme`) en la primera visita.
