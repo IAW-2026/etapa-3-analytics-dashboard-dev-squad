@@ -7,7 +7,6 @@
 ## Usuarios de prueba
 
 La aplicación utiliza **Clerk** para autenticación. Para ingresar al dashboard, puedes registrarte o iniciar sesión con cualquier cuenta de correo electrónico válida, es decir, que esté asociada a un rol de administrador. 
-## Usuarios de prueba
 
 | Rol | Email | Contraseña |
 |-----|-------|-----------|
