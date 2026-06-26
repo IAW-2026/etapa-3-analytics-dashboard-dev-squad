@@ -67,13 +67,10 @@ export async function fetchOrders(params?: {
   const secret = process.env.BUYER_SECRET
   if (!secret) throw new Error('BUYER_SECRET no configurada')
 
-    console.log("URL:", url)
-console.log("SECRET:", !!secret)
   const res = await fetch(url, {
     headers: { 'buyer-key': secret },
   })
 
-  console.log("STATUS:", res.status);
 
   if (!res.ok) {
     if (res.status === 403) throw new Error('Clave inválida')

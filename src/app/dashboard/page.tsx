@@ -146,7 +146,6 @@ export default async function DashboardPage(props: {
   searchParams: Promise<{ status?: string; page?: string; limit?: string }>
 }) {
 
-  console.log("Entrando a dashboard");
   const searchParams = await props.searchParams
   const status = (Object.hasOwn(STATUS_LABELS, searchParams.status ?? '')
     ? searchParams.status
