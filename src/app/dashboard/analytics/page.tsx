@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getFeedbackStats, getFeedbackReviews } from '@/lib/api'
+import { getFeedbackStats } from '@/lib/api'
 import AnalyticsClient from './AnalyticsClient'
 
 function AnalyticsSkeleton() {
@@ -28,14 +28,8 @@ function AnalyticsSkeleton() {
 }
 
 async function AnalyticsContent() {
-  const [stats, reviewsRes] = await Promise.all([
-    getFeedbackStats(),
-    getFeedbackReviews({ page: 1, limit: 1000 }).catch(() => null),
-  ])
-
-  const reviews = reviewsRes?.data ?? []
-
-  return <AnalyticsClient stats={stats} reviews={reviews} />
+  const stats = await getFeedbackStats()
+  return <AnalyticsClient stats={stats} />
 }
 
 export default function AnalyticsPage() {
